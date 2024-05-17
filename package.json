@@ -41,14 +41,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kanjiup-recognition.git"
+    "url": "git+https://github.com/alexandre-em/kanji-up-recognition.git"
   },
   "author": "Alexandre Em <alexandre.em@pm.me> (https://alexandre-em.fr)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/kanjiup-recognition/issues"
+    "url": "https://github.com/alexandre-em/kanji-up-recognition/issues"
   },
-  "homepage": "https://github.com/kanjiup-recognition#readme",
+  "homepage": "https://github.com/alexandre-em/kanji-up-recognition#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
