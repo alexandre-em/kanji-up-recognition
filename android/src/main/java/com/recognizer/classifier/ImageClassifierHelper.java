@@ -1,101 +1,91 @@
 package com.recognizer.classifier;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.SystemClock;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.recognizer.IModelHelper;
+import com.recognizer.ModelHelperOptions;
 
-import org.tensorflow.lite.gpu.CompatibilityList;
+import org.tensorflow.lite.DataType;
+import org.tensorflow.lite.Interpreter;
+import org.tensorflow.lite.support.common.ops.NormalizeOp;
 import org.tensorflow.lite.support.image.ImageProcessor;
 import org.tensorflow.lite.support.image.TensorImage;
-import org.tensorflow.lite.task.core.BaseOptions;
-import org.tensorflow.lite.task.core.vision.ImageProcessingOptions;
-import org.tensorflow.lite.task.vision.classifier.Classifications;
-import org.tensorflow.lite.task.vision.classifier.ImageClassifier;
+import org.tensorflow.lite.support.image.ops.ResizeOp;
+import org.tensorflow.lite.support.image.ops.TransformToGrayscaleOp;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
-enum DELEGATION_TYPE {
-  DELEGATE_CPU,
-  DELEGATE_GPU,
-  DELEGATE_NNAPI,
-}
+public class ImageClassifierHelper<T> implements IModelHelper<T> {
+  private ByteBuffer buffer;
+  private ByteBuffer imgData;
+  private Interpreter model;
+  private List<String> labels;
+  private ModelHelperOptions options;
 
-public abstract class ImageClassifierHelper<T> implements IModelHelper<T> {
-  private String path;
-  private String[] labels;
-  private Context context;
-  private ImageClassifier classifier;
-  private DELEGATION_TYPE delegation = DELEGATION_TYPE.DELEGATE_CPU;
-  public static final float THRESHOLD = 0.004f;
-  public static final int NUM_THREADS = 2;
-  public static final int MAX_RESULTS = 16;
+  public ImageClassifierHelper(ByteBuffer buffer, List<String> labels) {
+    this(buffer, labels, new ModelHelperOptions());
+  }
 
-  public ImageClassifierHelper(String path, String[] labels, DELEGATION_TYPE delegation) throws Exception {
-    this.path = path;
+  public ImageClassifierHelper(ByteBuffer buffer, List<String> labels, ModelHelperOptions options) {
+    this.buffer = buffer;
     this.labels = labels;
-    this.delegation = delegation;
-
-    init();
+    this.options = options;
   }
 
   @Override
-  public void init() throws Exception {
-    ImageClassifier.ImageClassifierOptions.Builder optionsBuilder = ImageClassifier.ImageClassifierOptions.builder()
-      .setScoreThreshold(THRESHOLD)
-      .setMaxResults(MAX_RESULTS);
+  public void init() {
+    Interpreter.Options modelOptions = new Interpreter.Options()
+      .setNumThreads(options.getNbThreads() != 0 ? options.getNbThreads() : Runtime.getRuntime().availableProcessors())
+      .setUseNNAPI(options.getUseNNAPI());
 
-    BaseOptions.Builder baseOptionsBuilder = BaseOptions.builder().setNumThreads(NUM_THREADS);
+    this.model = new Interpreter(this.buffer, modelOptions);
 
-    switch (this.delegation) {
-      case DELEGATE_GPU:
-        if ((new CompatibilityList()).isDelegateSupportedOnThisDevice()) {
-          baseOptionsBuilder.useGpu();
-        } else {
-          throw new Exception("GPU is not supported on this device");
-        }
-        break;
-      case DELEGATE_NNAPI:
-        baseOptionsBuilder.useNnapi();
-        break;
-      default:
-        throw new IllegalStateException("Unexpected value: " + this.delegation);
-    }
+    // Read input shape from model file
+    int[] inputShape = this.model.getInputTensor(0).shape();
+    int inputImageWidth = inputShape[1];
+    int inputImageHeight = inputShape[2];
 
-    optionsBuilder.setBaseOptions(baseOptionsBuilder.build());
-
-    try {
-      classifier = ImageClassifier.createFromFileAndOptions(this.context, this.path, optionsBuilder.build());
-    } catch (IllegalStateException e) {
-      Log.e("ImageClassifierHelper", "TFLite failed to load model with error: " + e.getMessage());
-      throw new Exception("Image classifier failed to initialize. See error logs for details");
-    }
+    this.options.setModelInputSize(4 * inputImageWidth * inputImageHeight * 1);
   }
 
   @Override
   public void clear() {
-    classifier = null;
+    this.model.close();
+    this.model = null;
   }
 
   @Override
-  public T predict(Bitmap image) throws Exception {
-    if (this.classifier == null) { this.init(); }
+  public float[][] predict(@NonNull Bitmap image) throws Exception {
+    if (this.model == null) {
+      throw new Exception("Classifier not loaded");
+    }
 
-    long startTime = SystemClock.uptimeMillis();
+    // Read input shape from model file
+    int[] inputShape = this.model.getInputTensor(0).shape();
+    int inputImageWidth = inputShape[1];
+    int inputImageHeight = inputShape[2];
 
-    ImageProcessor imageProcessor = new ImageProcessor.Builder().build();
+    // Preprocessing
+    ImageProcessor imageProcessor =
+      new ImageProcessor.Builder()
+        .add(new TransformToGrayscaleOp()) // Transforming image to grayscale to fit the model's input
+        .add(new ResizeOp(inputImageWidth, inputImageHeight, ResizeOp.ResizeMethod.BILINEAR)) // Resizing image to fit the model's input
+        .add(new NormalizeOp(0, 255)) // Normalize tensor values to be between 0 and 1
+        .build();
 
-    TensorImage tensorImage = imageProcessor.process(TensorImage.fromBitmap(image));
+    TensorImage tensor = new TensorImage(DataType.FLOAT32);
 
-    ImageProcessingOptions imageProcessingOptions = ImageProcessingOptions.builder()
-      .build();
+    tensor.load(image);
+    tensor = imageProcessor.process(tensor);
 
-    List<Classifications> results = this.classifier.classify(tensorImage, imageProcessingOptions);
+    float[][] probArray = new float[1][labels.size()];
 
-    long inferenceTime = SystemClock.uptimeMillis() - startTime;
+    // Inference
+    this.model.run(tensor, probArray);
 
-    return null;
+    return probArray;
   }
 }
