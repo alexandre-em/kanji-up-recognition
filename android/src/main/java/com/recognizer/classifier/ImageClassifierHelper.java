@@ -4,8 +4,10 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.react.bridge.WritableArray;
 import com.recognizer.IModelHelper;
 import com.recognizer.ModelHelperOptions;
+import com.recognizer.Result;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
@@ -18,12 +20,12 @@ import org.tensorflow.lite.support.image.ops.TransformToGrayscaleOp;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class ImageClassifierHelper<T> implements IModelHelper<T> {
+public class ImageClassifierHelper<T extends Result> implements IModelHelper<T> {
   private ByteBuffer buffer;
-  private ByteBuffer imgData;
   private Interpreter model;
   private List<String> labels;
   private ModelHelperOptions options;
+  private float[][] probArray;
 
   public ImageClassifierHelper(ByteBuffer buffer, List<String> labels) {
     this(buffer, labels, new ModelHelperOptions());
@@ -33,6 +35,10 @@ public class ImageClassifierHelper<T> implements IModelHelper<T> {
     this.buffer = buffer;
     this.labels = labels;
     this.options = options;
+
+    probArray = new float[1][labels.size()];
+
+    this.init();
   }
 
   @Override
@@ -58,7 +64,7 @@ public class ImageClassifierHelper<T> implements IModelHelper<T> {
   }
 
   @Override
-  public float[][] predict(@NonNull Bitmap image) throws Exception {
+  public void predict(@NonNull Bitmap image) throws Exception {
     if (this.model == null) {
       throw new Exception("Classifier not loaded");
     }
@@ -71,8 +77,8 @@ public class ImageClassifierHelper<T> implements IModelHelper<T> {
     // Preprocessing
     ImageProcessor imageProcessor =
       new ImageProcessor.Builder()
-        .add(new TransformToGrayscaleOp()) // Transforming image to grayscale to fit the model's input
         .add(new ResizeOp(inputImageWidth, inputImageHeight, ResizeOp.ResizeMethod.BILINEAR)) // Resizing image to fit the model's input
+        .add(new TransformToGrayscaleOp()) // Transforming image to grayscale to fit the model's input
         .add(new NormalizeOp(0, 255)) // Normalize tensor values to be between 0 and 1
         .build();
 
@@ -81,11 +87,30 @@ public class ImageClassifierHelper<T> implements IModelHelper<T> {
     tensor.load(image);
     tensor = imageProcessor.process(tensor);
 
-    float[][] probArray = new float[1][labels.size()];
-
     // Inference
-    this.model.run(tensor, probArray);
+    this.model.run(tensor.getBuffer(), probArray);
 
+    // TODO: Mapping prob with corresponding labels, sort the array then return MAX_RESULTS first results
+  }
+
+  @Override
+  public WritableArray toWritable(){
+    return null;
+  }
+
+  public float[][] getProbArray() {
     return probArray;
+  }
+
+  public List<String> getLabels() {
+    return labels;
+  }
+
+  public Interpreter getModel() {
+    return model;
+  }
+
+  public ModelHelperOptions getOptions() {
+    return options;
   }
 }

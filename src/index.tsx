@@ -17,6 +17,10 @@ const KanjiUpRecognition = NativeModules.KanjiUpRecognition
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return KanjiUpRecognition.multiply(a, b);
+export function load(): Promise<any> {
+  return KanjiUpRecognition.load();
+}
+
+export function predict(buffer: any): Promise<any> {
+  return KanjiUpRecognition.predict(buffer);
 }

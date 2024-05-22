@@ -1,6 +1,6 @@
 {
   "name": "react-native-kanji-up-recognition",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "KanjiUp recognition library",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
