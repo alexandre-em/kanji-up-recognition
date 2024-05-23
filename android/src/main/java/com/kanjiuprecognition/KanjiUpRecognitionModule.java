@@ -6,21 +6,25 @@ import android.util.Base64;
 
 import androidx.annotation.NonNull;
 
+import com.IResult;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.module.annotations.ReactModule;
 import com.recognizer.IModelHelper;
-import com.recognizer.classifier.ClassifierResult;
+import com.recognizer.ModelHelperOptions;
+import com.recognizer.classifier.ImageClassifierResult;
+import com.recognizer.classifier.ImageClassifierHelper;
+import com.recognizer.classifier.ImageClassifierHelperOptions;
 import com.recognizer.classifier.JoyoKanjiRecognition;
 
-import java.nio.ByteBuffer;
+import java.util.List;
 
 @ReactModule(name = KanjiUpRecognitionModule.NAME)
 public class KanjiUpRecognitionModule extends ReactContextBaseJavaModule {
   public static final String NAME = "KanjiUpRecognition";
-  private IModelHelper<ClassifierResult> model;
+  private IModelHelper model;
 
   public KanjiUpRecognitionModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -51,7 +55,13 @@ public class KanjiUpRecognitionModule extends ReactContextBaseJavaModule {
 
       this.model.predict(image);
 
-      promise.resolve(this.model.toWritable());
+      float[][] probArrays = ((ImageClassifierHelper) this.model).getProbArray();
+      List<String> labels = ((ImageClassifierHelper) this.model).getLabels();
+      ModelHelperOptions options = ((ImageClassifierHelper) this.model).getOptions();
+
+      IResult results = new ImageClassifierResult(probArrays[0], labels, (ImageClassifierHelperOptions) options);
+
+      promise.resolve(results.toWritable());
     } catch (Exception e) {
       promise.reject(e);
     }
@@ -72,7 +82,16 @@ public class KanjiUpRecognitionModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void isModelLoaded(Promise promise) {
+  public void loadCustomModel(String modelPath, String labelPath, Promise promise) {
+    try {
+      promise.resolve(true);
+    } catch (Exception e) {
+      promise.reject(e);
+    }
+  }
+
+  @ReactMethod
+  public void isLoaded(Promise promise) {
     if (super.getReactApplicationContext() == null) {
       promise.reject(new Exception("No android context detected"));
     }
@@ -81,12 +100,9 @@ public class KanjiUpRecognitionModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void customModelLoad(ByteBuffer buffer, Promise promise) {
-    if (buffer == null) {
-      promise.reject(new Exception("No model has been loaded"));
-    }
-
+  public void clear(Promise promise) {
     try {
+      this.model.clear();
       promise.resolve(true);
     } catch (Exception e) {
       promise.reject(e);

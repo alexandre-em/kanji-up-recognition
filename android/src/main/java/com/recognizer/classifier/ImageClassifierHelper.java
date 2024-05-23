@@ -4,10 +4,8 @@ import android.graphics.Bitmap;
 
 import androidx.annotation.NonNull;
 
-import com.facebook.react.bridge.WritableArray;
 import com.recognizer.IModelHelper;
 import com.recognizer.ModelHelperOptions;
-import com.recognizer.Result;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
@@ -20,21 +18,21 @@ import org.tensorflow.lite.support.image.ops.TransformToGrayscaleOp;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class ImageClassifierHelper<T extends Result> implements IModelHelper<T> {
+public class ImageClassifierHelper implements IModelHelper {
   private ByteBuffer buffer;
   private Interpreter model;
   private List<String> labels;
-  private ModelHelperOptions options;
+  private ImageClassifierHelperOptions options;
   private float[][] probArray;
 
   public ImageClassifierHelper(ByteBuffer buffer, List<String> labels) {
-    this(buffer, labels, new ModelHelperOptions());
+    this(buffer, labels, new ImageClassifierHelperOptions());
   }
 
   public ImageClassifierHelper(ByteBuffer buffer, List<String> labels, ModelHelperOptions options) {
     this.buffer = buffer;
     this.labels = labels;
-    this.options = options;
+    this.options = (ImageClassifierHelperOptions) options;
 
     probArray = new float[1][labels.size()];
 
@@ -48,13 +46,6 @@ public class ImageClassifierHelper<T extends Result> implements IModelHelper<T> 
       .setUseNNAPI(options.getUseNNAPI());
 
     this.model = new Interpreter(this.buffer, modelOptions);
-
-    // Read input shape from model file
-    int[] inputShape = this.model.getInputTensor(0).shape();
-    int inputImageWidth = inputShape[1];
-    int inputImageHeight = inputShape[2];
-
-    this.options.setModelInputSize(4 * inputImageWidth * inputImageHeight * 1);
   }
 
   @Override
@@ -89,14 +80,7 @@ public class ImageClassifierHelper<T extends Result> implements IModelHelper<T> 
 
     // Inference
     this.model.run(tensor.getBuffer(), probArray);
-
-    // TODO: Mapping prob with corresponding labels, sort the array then return MAX_RESULTS first results
-  }
-
-  @Override
-  public WritableArray toWritable(){
-    return null;
-  }
+ }
 
   public float[][] getProbArray() {
     return probArray;
@@ -104,10 +88,6 @@ public class ImageClassifierHelper<T extends Result> implements IModelHelper<T> 
 
   public List<String> getLabels() {
     return labels;
-  }
-
-  public Interpreter getModel() {
-    return model;
   }
 
   public ModelHelperOptions getOptions() {
