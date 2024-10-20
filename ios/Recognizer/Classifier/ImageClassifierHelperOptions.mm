@@ -6,6 +6,7 @@
 //
 
 #import "ImageClassifierHelperOptions.h"
+#import "KanjiRecognitionConst.h"
 
 @implementation ImageClassifierHelperOptions
 
@@ -18,22 +19,22 @@
 
 - (id) init
 {
-    int threads = [[NSProcessInfo processInfo] activeProcessorCount];
-    
-    return [self init:DEFAULT_THRESHOLD threads:threads maxResults:DEFAULT_MAX_RESULT];
+  int threads = [[NSProcessInfo processInfo] activeProcessorCount];
+  
+  return [self init:DEFAULT_THRESHOLD threads:threads maxResults:DEFAULT_MAX_RESULT];
 }
 
 - (id) init: (float)threshold threads:(int)threads maxResults:(int)maxResults
 {
-    self = [super init];
-    if (self) {
-        maxResults = maxResults;
-        nbThreads = threads;
-        threshold = threshold;
-        imageWidth = DEFAULT_IMAGE_WIDTH;
-        imageHeight = DEFAULT_IMAGE_HEIGHT;
-    }
-    return self;
+  self = [super init];
+  if (self) {
+    self.maxResults = maxResults;
+    self.nbThreads = threads;
+    self.threshold = threshold;
+    self.imageWidth = DEFAULT_IMAGE_WIDTH;
+    self.imageHeight = DEFAULT_IMAGE_HEIGHT;
+  }
+  return self;
 }
 
 @end

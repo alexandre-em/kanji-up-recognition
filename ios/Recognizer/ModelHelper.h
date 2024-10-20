@@ -4,12 +4,10 @@
 //
 //  Created by Alexandre Em on 24/05/2024.
 //
-
+#import "ModelHelperOptions.h"
 @protocol ModelHelper
-
-@property NSData* results;
 
 - (void)initialize;
 - (void)clear;
-- (void)predict: (UIImage*) image;
+- (const float *)predict: (UIImage*) image;
 @end

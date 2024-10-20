@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { load, predict } from 'react-native-kanji-up-recognition';
+import { load, predict, urlToBase64 } from 'react-native-kanji-up-recognition';
 
 const urls = [
   'https://firebasestorage.googleapis.com/v0/b/alexandre-em.appspot.com/o/uploads%2Fpictures%2Ftest%2F1.png?alt=media&token=af639ead-422d-4ee7-9dbd-db8c1827d1d6',
@@ -13,45 +13,17 @@ const urls = [
   'https://firebasestorage.googleapis.com/v0/b/alexandre-em.appspot.com/o/uploads%2Fpictures%2Ftest%2FUntitled.png?alt=media&token=8f99f33d-2221-45b5-8772-31bcd2b96929',
 ];
 
-function fetchBuffer(url: string) {
-  return new Promise((accept, reject) => {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, true);
-    req.responseType = 'arraybuffer';
-
-    req.onload = function () {
-      var resp = req.response;
-      if (resp) {
-        accept(resp);
-      }
-    };
-
-    req.onerror = (err: any) => {
-      console.error('Error occured on fetching image:', err);
-      reject(err);
-    };
-
-    req.ontimeout = () => reject(new TypeError('Network request failed'));
-
-    req.send(null);
-  });
-}
-
 export default function App() {
-  const [result, setResult] = React.useState<boolean | undefined>(false);
+  const [result, setResult] = React.useState<string | undefined>('Result Test');
 
   React.useEffect(() => {
     load()
       .then((res) => {
         console.log('Is the model is loaded the first tim? ', res);
-        fetchBuffer(urls[0]!)
-          .then((res2) =>
-            predict(base64ArrayBuffer(res2 as ArrayBuffer))
-              .catch(console.error)
-              .then(console.log)
-          )
+        setResult(res || 'undefined');
+        urlToBase64(urls[0]!)
+          .then((img) => predict(img).catch(console.error).then(console.log))
           .catch(console.error);
-        setResult(true);
       })
       .catch(console.error);
   }, []);

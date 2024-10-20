@@ -8,7 +8,7 @@
 #ifndef ModelHelperOptions_h
 #define ModelHelperOptions_h
 
-@interface ModelHelperOptions : NSObject
+@protocol ModelHelperOptions 
 
 - (id) init;
 

@@ -1405,7 +1405,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 233d1a798fe0ff33b8e630b8f00f62c4a8115fbc
   React-logger: 7e7403a2b14c97f847d90763af76b84b152b6fce
   React-Mapbuffer: 11029dcd47c5c9e057a4092ab9c2a8d10a496a33
-  react-native-kanji-up-recognition: ef630b994a2619bbb46c7aee2d95e2228e9c0251
+  react-native-kanji-up-recognition: a6874f3b6d385a6a8af608099686351c4bad00a4
   React-nativeconfig: b0073a590774e8b35192fead188a36d1dca23dec
   React-NativeModulesApple: df46ff3e3de5b842b30b4ca8a6caae6d7c8ab09f
   React-perflogger: 3d31e0d1e8ad891e43a09ac70b7b17a79773003a
@@ -1434,6 +1434,6 @@ SPEC CHECKSUMS:
   TensorFlowLiteObjC: d2f4f4b543a733b0a3efb19904ffb1da267fa002
   Yoga: 348f8b538c3ed4423eb58a8e5730feec50bce372
 
-PODFILE CHECKSUM: fe4b7968f66e3476f0552e167026ff96eea198f3
+PODFILE CHECKSUM: d864eaa19b71487cd5558b0750ce75769e0706c1
 
-COCOAPODS: 1.14.2
+COCOAPODS: 1.15.2

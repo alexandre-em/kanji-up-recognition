@@ -1,4 +1,5 @@
 import { NativeModules, Platform } from 'react-native';
+import { base64ArrayBuffer, fetchBuffer } from './utils';
 
 const LINKING_ERROR =
   `The package 'react-native-kanji-up-recognition' doesn't seem to be linked. Make sure: \n\n` +
@@ -23,4 +24,9 @@ export function load(): Promise<any> {
 
 export function predict(buffer: any): Promise<any> {
   return KanjiUpRecognition.predict(buffer);
+}
+
+export async function urlToBase64(url: string) {
+  const data = await fetchBuffer(url);
+  return base64ArrayBuffer(data as ArrayBuffer);
 }
