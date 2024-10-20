@@ -1,7 +1,7 @@
 {
-  "name": "react-native-kanji-up-recognition",
+  "name": "@kanjiup/recognition",
   "version": "0.0.1",
-  "description": "KanjiUp recognition library",
+  "description": "KanjiUp library, for recognizing joyo kanji characters (~2600 characters)",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/src/index.d.ts",
@@ -99,13 +99,17 @@
   "release-it": {
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
+      "tagName": "v${version}",
+      "requireCleanWorkingDir": true,
+      "requireBranch": "main"
     },
     "npm": {
       "publish": true
     },
     "github": {
-      "release": true
+      "release": true,
+      "tokenRef": "MY_GITHUB_RELEASE_TOKEN",
+      "private": true
     },
     "plugins": {
       "@release-it/conventional-changelog": {

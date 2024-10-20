@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { load, predict, urlToBase64 } from 'react-native-kanji-up-recognition';
+import { load, predict, urlToBase64 } from '@kanjiup/recognition';
 
 const urls = [
   'https://firebasestorage.googleapis.com/v0/b/alexandre-em.appspot.com/o/uploads%2Fpictures%2Ftest%2F1.png?alt=media&token=af639ead-422d-4ee7-9dbd-db8c1827d1d6',

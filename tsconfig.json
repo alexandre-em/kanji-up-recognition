@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "react-native-kanji-up-recognition": ["./src/index"]
+      "@kanjiup/recognition": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
