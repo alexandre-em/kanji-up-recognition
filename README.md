@@ -99,16 +99,13 @@ click Add Files to `<your project name>`..., select the model and label files.
 ### Example
 
 ```js
-import { load, predict, clean, urlToBase64 } from '@kanjiup/recognition';
+import { load, predict, urlToBase64 } from '@kanjiup/recognition';
 
 await load();
 const imageUrl: string = 'https://storage.kanjiup.alexandre-em/kanji-test-ai.png';
 const base64Img: string = await urlToBase64(imageUrl);
 // Waiting for the model to load
 const predictions: { label: string, confidence: number }[] = await predict(base64Img);
-
-// Cleaning after (iOS only)
-return clean();
 ```
 
 ### Image classification

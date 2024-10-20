@@ -12,17 +12,22 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(load:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 {
-  NSString *modelPath = [[NSBundle mainBundle] pathForResource:@"kanji_model"
-                                                        ofType:@"tflite"];
-  
-  ImageClassifierHelper* ich = [ImageClassifierHelper alloc];
-  model = [ich initWithModel:modelPath];
-  
-  [self loadLabels];
-  
-  [model initialize];
-  
-  resolve(modelPath);
+  @try {
+    NSString *modelPath = [[NSBundle mainBundle] pathForResource:@"kanji_model"
+                                                          ofType:@"tflite"];
+    
+    ImageClassifierHelper* ich = [ImageClassifierHelper alloc];
+    model = [ich initWithModel:modelPath];
+    
+    [self loadLabels];
+    
+    [model initialize];
+    
+    resolve(modelPath);
+  }
+  @catch (NSException *e) {
+    reject(@"load_failure", e.reason, nil);
+  }
 }
 
 
@@ -31,23 +36,28 @@ RCT_EXPORT_METHOD(predict:(NSString *)base64Image
                   reject:(RCTPromiseRejectBlock)reject)
 {
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    if (!self.model) {
-      reject(@"model_error", @"Model is not loaded, please call load method", [NSError init]);
+    @try {
+      if (!self.model) {
+        reject(@"model_error", @"Model is not loaded, please call load method", [NSError init]);
+      }
+      // Convert Base64 image into a UIImage
+      NSData *imageData = [[NSData alloc] initWithBase64EncodedString:base64Image options:NSDataBase64DecodingIgnoreUnknownCharacters];
+      UIImage *image = [UIImage imageWithData:imageData];
+      
+      if (!image) {
+        reject(@"image_error", @"Impossible de décoder l'image Base64", nil);
+        return;
+      }
+      
+      const float* outputData = [self.model predict:image];
+      
+      NSArray<NSDictionary *> *results = [self getTopNScores:outputData n:DEFAULT_MAX_RESULT];
+      
+      resolve(results);
     }
-    // Convert Base64 image into a UIImage
-    NSData *imageData = [[NSData alloc] initWithBase64EncodedString:base64Image options:NSDataBase64DecodingIgnoreUnknownCharacters];
-    UIImage *image = [UIImage imageWithData:imageData];
-    
-    if (!image) {
-      reject(@"image_error", @"Impossible de décoder l'image Base64", nil);
-      return;
+    @catch (NSException *e) {
+      reject(@"prediction_failure", e.reason, nil);
     }
-    
-    const float* outputData = [self.model predict:image];
-    
-    NSArray<NSDictionary *> *results = [self getTopNScores:outputData n:DEFAULT_MAX_RESULT];
-    
-    resolve(results);
   });
 }
 
