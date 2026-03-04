@@ -74,4 +74,16 @@ public class JoyoKanjiRecognition implements IModelHelper {
   public void predict(Bitmap image) throws Exception {
     this.model.predict(image);
   }
+
+  public float[][] getProbArray() {
+    return this.model.getProbArray();
+  }
+
+  public List<String> getLabels() {
+    return this.model.getLabels();
+  }
+
+  public ModelHelperOptions getOptions() {
+    return this.model.getOptions();
+  }
 }

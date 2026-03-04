@@ -55,9 +55,9 @@ public class KanjiUpRecognitionModule extends ReactContextBaseJavaModule {
 
       this.model.predict(image);
 
-      float[][] probArrays = ((ImageClassifierHelper) this.model).getProbArray();
-      List<String> labels = ((ImageClassifierHelper) this.model).getLabels();
-      ModelHelperOptions options = ((ImageClassifierHelper) this.model).getOptions();
+      float[][] probArrays = this.model.getProbArray();
+      List<String> labels = this.model.getLabels();
+      ModelHelperOptions options = this.model.getOptions();
 
       IResult results = new ImageClassifierResult(probArrays[0], labels, (ImageClassifierHelperOptions) options);
 
