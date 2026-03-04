@@ -44,6 +44,6 @@ public class ImageClassifierResult implements IResult {
 
   @Override
   public WritableArray toWritable() {
-    return null;
+    return this.results;
   }
 }
