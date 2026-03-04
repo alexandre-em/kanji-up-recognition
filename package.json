@@ -1,6 +1,6 @@
 {
   "name": "@kanjiup/recognition",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "KanjiUp library, for recognizing joyo kanji characters (~2600 characters)",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
