@@ -24,7 +24,7 @@ import java.util.List;
 @ReactModule(name = KanjiUpRecognitionModule.NAME)
 public class KanjiUpRecognitionModule extends ReactContextBaseJavaModule {
   public static final String NAME = "KanjiUpRecognition";
-  private IModelHelper model;
+  private JoyoKanjiRecognition model;
 
   public KanjiUpRecognitionModule(ReactApplicationContext reactContext) {
     super(reactContext);
