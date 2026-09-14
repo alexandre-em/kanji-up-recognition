@@ -76,6 +76,12 @@ public class ImageClassifierHelper implements IModelHelper {
     TensorImage tensor = new TensorImage(DataType.FLOAT32);
 
     tensor.load(image);
+    // TensorImage.load() copies pixel data into its own buffer — the source bitmap is dead
+    // weight after this point. Without an explicit recycle(), release depends on the GC
+    // finalizer running, which lags badly under the repeated back-to-back allocations one
+    // evaluation session produces (one predict() call per question), showing up as the app
+    // getting progressively heavier during and across sessions.
+    image.recycle();
     tensor = imageProcessor.process(tensor);
 
     // Inference
