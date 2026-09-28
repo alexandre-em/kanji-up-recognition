@@ -97,7 +97,12 @@ dependencies {
   // crashes on 16 KB-page devices. LiteRT keeps the exact same org.tensorflow.lite.* API
   // (Interpreter et al.), just under this new coordinate, with a properly 16 KB-aligned .so.
   implementation 'com.google.ai.edge.litert:litert:2.2.0'
-  // No native code of its own (pure Java/Kotlin preprocessing helpers) — unaffected, still current
-  implementation 'org.tensorflow:tensorflow-lite-support:0.4.4'
+  // No native code of its own (pure Java/Kotlin preprocessing helpers) — unaffected, still current.
+  // It transitively pulls the old org.tensorflow:tensorflow-lite though, whose classes collide
+  // with LiteRT's (same org.tensorflow.lite.* package) — excluded since LiteRT above provides them.
+  implementation('org.tensorflow:tensorflow-lite-support:0.4.4') {
+    exclude group: 'org.tensorflow', module: 'tensorflow-lite'
+    exclude group: 'org.tensorflow', module: 'tensorflow-lite-api'
+  }
 }
 
