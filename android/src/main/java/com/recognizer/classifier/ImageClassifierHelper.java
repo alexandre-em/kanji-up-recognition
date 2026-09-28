@@ -41,9 +41,12 @@ public class ImageClassifierHelper implements IModelHelper {
 
   @Override
   public void init() {
+    // setUseNNAPI() doesn't exist on LiteRT's Options (NNAPI itself is being phased out by
+    // Android) — setUseXNNPACK() is the maintained CPU-acceleration equivalent, reusing the same
+    // stored flag so the "accelerate by default" behavior is unchanged.
     Interpreter.Options modelOptions = new Interpreter.Options()
       .setNumThreads(options.getNbThreads() != 0 ? options.getNbThreads() : Runtime.getRuntime().availableProcessors())
-      .setUseNNAPI(options.getUseNNAPI());
+      .setUseXNNPACK(options.getUseNNAPI());
 
     this.model = new Interpreter(this.buffer, modelOptions);
   }
