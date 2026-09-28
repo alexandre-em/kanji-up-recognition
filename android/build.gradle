@@ -92,7 +92,12 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-android:0.74.1"
 
-  implementation 'org.tensorflow:tensorflow-lite:2.5.0'
+  // org.tensorflow:tensorflow-lite is a dead-end relocation past 2.16.1 (the project renamed to
+  // LiteRT) and its last real release only shipped a 4 KB-page-aligned native library, which
+  // crashes on 16 KB-page devices. LiteRT keeps the exact same org.tensorflow.lite.* API
+  // (Interpreter et al.), just under this new coordinate, with a properly 16 KB-aligned .so.
+  implementation 'com.google.ai.edge.litert:litert:2.2.0'
+  // No native code of its own (pure Java/Kotlin preprocessing helpers) — unaffected, still current
   implementation 'org.tensorflow:tensorflow-lite-support:0.4.4'
 }
 
